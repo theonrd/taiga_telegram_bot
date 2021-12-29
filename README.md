@@ -2,6 +2,7 @@
 
 After first launch application will generate config file (config.json) and exit. Just configure this file and launch again.
 
+```
 {
   "chat_ids": "", // Can be empty.
   "admins": "userid1,userid2,userid3", // Who have admin rights. You can add multiple admins.
@@ -18,6 +19,7 @@ After first launch application will generate config file (config.json) and exit.
   "site_address": "", // Your taiga site address. Can be empty.
   "api_address": "" // Your taiga api address. By default it's in "https:/yoursite.com/api/v1" format.
 }
+```
 
 Use /subscribe command in needed chat for subscribe to taiga alerts. Use "/subscribe cancel" for unsubscribe. You need to have admin right for this.
 
