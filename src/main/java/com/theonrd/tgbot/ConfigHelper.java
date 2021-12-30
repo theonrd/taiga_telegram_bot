@@ -16,10 +16,13 @@ public class ConfigHelper {
             tgbot_id = "bot_id",
             tgbot_token = "bot_token",
             readyCategory = "ready";
+
     public static String[] tg_admins = new String[]{"null"};
+
     public static long
             update_timer_time = 3600000,
-            timezone_different = 3600000 * 3; // +3 GMT
+            timezone_different = 0;
+
     public static long[] alerts_chat_ids = new long[]{};
 
     private static final String configFilePath = "./config.json";
@@ -52,7 +55,7 @@ public class ConfigHelper {
 
         if (jsonObject.containsKey("chat_ids")) {
 
-            String[] parsedIDs = ((String) jsonObject.get("chat_ids")).contains(",") ?
+            var parsedIDs = ((String) jsonObject.get("chat_ids")).contains(",") ?
                     ((String) jsonObject.get("chat_ids")).split(",") : new String[]{((String) jsonObject.get("chat_ids"))};
 
             if (!parsedIDs[0].equals("") && !parsedIDs[0].equals("null")) {

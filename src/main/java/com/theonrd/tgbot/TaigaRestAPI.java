@@ -18,8 +18,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 
 public class TaigaRestAPI {
 
@@ -90,8 +88,6 @@ public class TaigaRestAPI {
                 if (currentTask.isActualToQuery())
                     tasksList.add(currentTask);
             }
-
-            System.out.println("Найдено " + tasksList.size() + " задач");
 
             if (tasksList.isEmpty())
                 return null;
