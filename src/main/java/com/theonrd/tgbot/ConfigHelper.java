@@ -17,7 +17,9 @@ public class ConfigHelper {
             tgbot_token = "bot_token",
             readyCategory = "ready";
     public static String[] tg_admins = new String[]{"null"};
-    public static long update_timer_time = 3600000;
+    public static long
+            update_timer_time = 3600000,
+            timezone_different = 3600000 * 3; // +3 GMT
     public static long[] alerts_chat_ids = new long[]{};
 
     private static final String configFilePath = "./config.json";
@@ -29,7 +31,7 @@ public class ConfigHelper {
         if (new File(configFilePath).createNewFile()) {
 
             ConfigSave();
-            return;
+            System.exit(0);
         }
 
         var jsonObject = (JSONObject) new JSONParser().parse(new FileReader(configFilePath));
@@ -41,6 +43,7 @@ public class ConfigHelper {
         tgbot_token = (String) jsonObject.get("tgbot_token");
         readyCategory = (String) jsonObject.get("ready_category");
         site_address = (String) jsonObject.get("site_address");
+        timezone_different = (Long) jsonObject.get("timezone_diff");
 
         tg_admins = ((String) jsonObject.get("admins")).contains(",") ?
                 ((String) jsonObject.get("admins")).split(",") : new String[]{((String) jsonObject.get("admins"))};
@@ -75,6 +78,7 @@ public class ConfigHelper {
         jsonObject.put("update_timer", update_timer_time);
         jsonObject.put("ready_category", readyCategory);
         jsonObject.put("site_address", site_address);
+        jsonObject.put("timezone_diff", timezone_different);
 
         // Admins array
         var array_converted = new StringBuilder();

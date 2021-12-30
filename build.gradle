@@ -10,13 +10,18 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
     implementation 'org.telegram:telegrambots:5.5.0'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.15.2'
 }
 
-test {
-    useJUnitPlatform()
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes "Main-Class": "com.theonrd.tgbot.tgbot"
+    }
 }

@@ -91,6 +91,8 @@ public class TaigaRestAPI {
                     tasksList.add(currentTask);
             }
 
+            System.out.println("Найдено " + tasksList.size() + " задач");
+
             if (tasksList.isEmpty())
                 return null;
 

@@ -31,6 +31,8 @@ public class TasksStruct {
 
     public boolean isActualToQuery() {
 
-        return System.currentTimeMillis() - ConfigHelper.update_timer_time <= this.getModTime();
+        System.out.println(System.currentTimeMillis() - ConfigHelper.update_timer_time + " <= " + this.getModTime());
+
+        return System.currentTimeMillis() - ConfigHelper.update_timer_time <= this.getModTime() + ConfigHelper.timezone_different;
     }
 }
