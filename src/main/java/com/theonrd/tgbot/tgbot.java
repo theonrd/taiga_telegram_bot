@@ -13,9 +13,9 @@ public class tgbot {
 
         try {
             ConfigHelper.ConfigLoad();
-            System.out.println("[OK] Config is loaded");
+            System.out.println("[" + java.time.LocalDateTime.now() + "] " + "Config is loaded");
         } catch (IOException | ParseException e) {
-            System.out.println("[FATAL] Config Error");
+            System.out.println("[" + java.time.LocalDateTime.now() + "] " + "Config Error");
             return;
         }
 

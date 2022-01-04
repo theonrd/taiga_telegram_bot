@@ -1,6 +1,5 @@
 package com.theonrd.tgbot;
 
-import com.nimbusds.jose.JOSEException;
 import com.theonrd.tgbot.BotCommands.DebugApiGetRequest;
 import com.theonrd.tgbot.BotCommands.FuckYouCommand;
 import com.theonrd.tgbot.BotCommands.SubscribeChatID;
@@ -12,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import java.io.IOException;
 import java.text.ParseException;
 
 public class BotMain extends TelegramLongPollingBot {
@@ -27,11 +25,7 @@ public class BotMain extends TelegramLongPollingBot {
         this.botToken = token;
         this.botUserName = userName;
 
-        try {
-            taigaRestAPI_Instance = new TaigaRestAPI();
-        } catch (IOException | ParseException | JOSEException e) {
-            e.printStackTrace();
-        }
+        taigaRestAPI_Instance = new TaigaRestAPI();
     }
 
     @Override
@@ -106,9 +100,9 @@ public class BotMain extends TelegramLongPollingBot {
                 return;
             }
             // Try to reconnect after every RECONNECT_PAUSE
-            System.out.println("Connection is invalid, trying again...");
+            System.out.println("[" + java.time.LocalDateTime.now() + "] " + "Connection is invalid, trying again...");
             openConnection();
         }
-        System.out.println("[OK] Bot is connected!");
+        System.out.println("[" + java.time.LocalDateTime.now() + "] " + "Bot is connected!");
     }
 }

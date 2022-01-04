@@ -1,6 +1,5 @@
 package com.theonrd.tgbot;
 
-import com.nimbusds.jose.*;
 import com.theonrd.tgbot.BotCommands.TasksStruct;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
@@ -21,46 +20,49 @@ import java.util.ArrayList;
 
 public class TaigaRestAPI {
 
-    private String api_token, refresh_value;
+    private String api_token;
     private final String api_content = "application/json";
 
-    public TaigaRestAPI() throws IOException, java.text.ParseException, JOSEException {
+    private boolean token_error = false;
+
+    public TaigaRestAPI() {
+
+        this.updateToken();
+    }
+
+    public void updateToken(){
 
         var file = new File("./token");
 
-        // Create new file and token if it isn't already created.
-        if (file.createNewFile()) {
-            var jsonAuth = "{" + "\"password\":\"" + ConfigHelper.password + "\"," + "\"type\":\"normal\"," + "\"username\":\"" + ConfigHelper.username + "\"}";
+        try {
+            // Create new file and token if it isn't already created.
+            String refresh_value;
+            if (file.createNewFile()) {
 
-            // Get, Parse and save token to variable
-            try {
+                // Get, Parse and save token to variable
+                var jsonAuth = "{" + "\"password\":\"" + ConfigHelper.password + "\"," + "\"type\":\"normal\"," + "\"username\":\"" + ConfigHelper.username + "\"}";
                 var jsonObject = (JSONObject) new JSONParser().parse(makePostRequest(jsonAuth, "/auth"));
                 this.api_token = (String) jsonObject.get("auth_token");
-                this.refresh_value = (String) jsonObject.get("refresh");
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        } else this.refresh_value = new String(Files.readAllBytes(file.toPath()));
+                refresh_value = (String) jsonObject.get("refresh");
 
-        String refreshed = makePostRequest("{\"refresh\":\"" + this.refresh_value + "\"}", "/auth/refresh");
+            } else
+                refresh_value = new String(Files.readAllBytes(file.toPath()));
 
-        try {
+            String refreshed = makePostRequest("{\"refresh\":\"" + refresh_value + "\"}", "/auth/refresh");
+
             var jsonObject = (JSONObject) new JSONParser().parse(refreshed);
-
-            this.refresh_value = (String) jsonObject.get("refresh");
+            refresh_value = (String) jsonObject.get("refresh");
             this.api_token = (String) jsonObject.get("auth_token");
 
-            // Write updated token
-            if (this.refresh_value != null) {
-                var writer = new FileWriter(file);
-                writer.write(this.refresh_value);
-                writer.close();
-            } else {
-                System.out.println("Invalid refresh operation!");
-            }
+            var writer = new FileWriter(file);
+            writer.write(refresh_value);
+            writer.close();
 
-        } catch (ParseException e) {
+            System.out.println("[" + java.time.LocalDateTime.now() + "] " + "Token updated.");
+
+        } catch (ParseException | IOException e) {
             e.printStackTrace();
+            this.token_error = true;
         }
     }
 
@@ -85,18 +87,16 @@ public class TaigaRestAPI {
 
                 var currentTask = new TasksStruct(lMillis, sTaskName, sCategory);
 
-                if (currentTask.isActualToQuery())
-                    tasksList.add(currentTask);
+                if (currentTask.isActualToQuery()) tasksList.add(currentTask);
             }
 
-            if (tasksList.isEmpty())
-                return null;
+            if (tasksList.isEmpty()) return null;
 
             var sbResult = new StringBuilder("Последние обновления в доске задач (Всего: ").append(tasksList.size()).append(")\n");
 
             var sbReady = new StringBuilder();
             var sbChanged = new StringBuilder();
-            for (var task: tasksList){
+            for (var task : tasksList) {
 
                 if (task.getCategoryName().equals(ConfigHelper.readyCategory))
                     sbReady.append(" > ").append(task.getTaskName()).append("\n");
@@ -104,11 +104,9 @@ public class TaigaRestAPI {
                     sbChanged.append(" > [").append(task.getCategoryName()).append("] ").append(task.getTaskName()).append("\n");
             }
 
-            if (!sbReady.toString().equals(""))
-                sbResult.append("\nЗадачи завершены:\n").append(sbReady);
+            if (!sbReady.toString().equals("")) sbResult.append("\nЗадачи завершены:\n").append(sbReady);
 
-            if (!sbChanged.toString().equals(""))
-                sbResult.append("\nНовые или измененные задачи:\n").append(sbChanged);
+            if (!sbChanged.toString().equals("")) sbResult.append("\nНовые или измененные задачи:\n").append(sbChanged);
 
             sbResult.append("\nПодробнее: ").append(ConfigHelper.site_address);
 
@@ -159,11 +157,11 @@ public class TaigaRestAPI {
         http.setRequestProperty(HttpHeaders.CONTENT_TYPE, this.api_content);
         http.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + this.api_token);
 
-        if (disablePagination)
-            http.setRequestProperty("x-disable-pagination", "True");
+        if (disablePagination) http.setRequestProperty("x-disable-pagination", "True");
 
         http.disconnect();
 
+        // OK
         if (http.getResponseCode() == 200) {
 
             var bufferedReader = new BufferedReader(new InputStreamReader((http.getInputStream())));
@@ -176,6 +174,13 @@ public class TaigaRestAPI {
             return stringBuilder.toString();
         }
 
-        return "Error code: " + http.getResponseCode() + " & " + http.getResponseMessage();
+        // Unauthorized. Prevent infinity loop by this.token_error variable
+        if (http.getResponseCode() == 401 && !this.token_error) {
+
+            this.updateToken();
+            return makeGetRequestToken(address, disablePagination);
+        }
+
+        return null;
     }
 }
