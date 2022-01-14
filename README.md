@@ -1,5 +1,7 @@
 # taiga_telegram_bot
 
+# All changes in private.
+
 After first launch application will generate config file (config.json) and exit. Just configure this file and launch again.
 
 ```
